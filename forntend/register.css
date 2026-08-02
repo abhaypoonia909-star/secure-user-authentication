@@ -1,0 +1,168 @@
+/* ==========================================================================
+   Register page
+   Loaded after style.css. Adds the strength meter, the live requirement
+   checklist, the terms row, and the post-submit confirmation state.
+   ========================================================================== */
+
+/* --- Password strength meter --------------------------------------------
+   Four segments fill as the score climbs 1 → 4. Colour is driven by the
+   [data-score] attribute register.js sets on the wrapper.
+   ------------------------------------------------------------------------ */
+.strength {
+  --meter: var(--border-strong);
+  margin-top: 0.6rem;
+}
+
+.strength__bars {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+}
+.strength__bars span {
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: var(--border);
+  transform: scaleX(1);
+  transform-origin: left;
+  transition: background-color var(--base) var(--ease), transform var(--base) var(--spring);
+}
+
+/* Fill the first N segments for score N */
+.strength[data-score="1"] .strength__bars span:nth-child(-n + 1),
+.strength[data-score="2"] .strength__bars span:nth-child(-n + 2),
+.strength[data-score="3"] .strength__bars span:nth-child(-n + 3),
+.strength[data-score="4"] .strength__bars span:nth-child(-n + 4) {
+  background: var(--meter);
+  transform: scaleY(1.25);
+}
+
+.strength[data-score="1"] { --meter: var(--danger); }
+.strength[data-score="2"] { --meter: var(--warn); }
+.strength[data-score="3"] { --meter: var(--accent); }
+.strength[data-score="4"] { --meter: var(--ok); }
+
+.strength__label {
+  margin-top: 0.5rem;
+  font-size: 0.81rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+.strength__label b {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--meter);
+}
+
+/* --- Live requirement checklist ------------------------------------------
+   Each rule ticks off as it is satisfied, so the rules are visible before
+   the user submits rather than as an error afterwards.
+   ------------------------------------------------------------------------ */
+.reqs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem 0.9rem;
+  list-style: none;
+  padding: 0;
+  margin-top: 0.75rem;
+}
+.reqs li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.79rem;
+  color: var(--text-faint);
+  transition: color var(--base) var(--ease);
+}
+.reqs li::before {
+  content: "";
+  width: 15px; height: 15px;
+  flex: none;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 50%;
+  background: transparent center / 9px no-repeat;
+  transition: background-color var(--base) var(--ease), border-color var(--base) var(--ease),
+              transform var(--base) var(--spring);
+}
+.reqs li.is-met { color: var(--ok); }
+.reqs li.is-met::before {
+  border-color: var(--ok);
+  background-color: var(--ok);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+  transform: scale(1.1);
+}
+
+@media (max-width: 420px) {
+  .reqs { grid-template-columns: 1fr; }
+}
+
+/* --- Terms checkbox ------------------------------------------------------ */
+.register__terms {
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+.register__terms input { margin-top: 2px; }
+.register__terms a { font-weight: 500; }
+.register__terms.is-invalid input { border-color: var(--danger); background: var(--danger-soft); }
+
+/* --- Confirmation state --------------------------------------------------
+   Replaces the form once validation passes; stands in for the backend's
+   "confirm your email" screen.
+   ------------------------------------------------------------------------ */
+.register__done {
+  display: none;
+  text-align: center;
+  animation: done-in var(--slow) var(--spring) both;
+}
+.register__done.is-shown { display: block; }
+
+.register__done .seal {
+  display: grid;
+  place-items: center;
+  width: 62px; height: 62px;
+  margin: 0 auto 1.25rem;
+  border-radius: 50%;
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.register__done .seal svg {
+  width: 28px; height: 28px;
+  stroke-dasharray: 30;
+  stroke-dashoffset: 30;
+  animation: draw-check 0.5s var(--ease) 0.2s forwards;
+}
+@keyframes draw-check { to { stroke-dashoffset: 0; } }
+
+.register__done h2 { font-size: var(--step-2); margin-bottom: 0.6rem; }
+.register__done p { color: var(--text-muted); font-size: 0.95rem; }
+.register__done .btn { margin-top: 1.5rem; }
+
+@keyframes done-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Fields stagger in, matching the login panel */
+.page-auth .form > * { animation: field-in var(--base) var(--ease) both; }
+.page-auth .form > :nth-child(2) { animation-delay: 0.05s; }
+.page-auth .form > :nth-child(3) { animation-delay: 0.1s; }
+.page-auth .form > :nth-child(4) { animation-delay: 0.15s; }
+.page-auth .form > :nth-child(5) { animation-delay: 0.2s; }
+.page-auth .form > :nth-child(6) { animation-delay: 0.25s; }
+.page-auth .form > :nth-child(7) { animation-delay: 0.3s; }
+
+@keyframes field-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-auth .form > * { animation: none; }
+  .strength__bars span { transition: none; }
+  .register__done .seal svg { animation: none; stroke-dashoffset: 0; }
+}
